@@ -1,0 +1,74 @@
+% Default setup file for TiltShearTool 
+% Use the percent sign at the start of the line for comments.
+% Variables are assumed to be in the following format:
+% 	for numerical values: name=value;
+% 	for string values: name="value";
+% Do not change the name of the variable!
+% String variables must be enclosed in quotes!
+
+% NOTE: Do not enclose the variable in quotes!
+wdir="/home/mroi/Downloads/TiltShearTool";
+
+%run program in debug mode
+debug="false";
+
+% tilt camera identifier
+tiltCameraDevice="BobcatTilt";
+
+% shear camera identifier
+shearCameraDevice="BobcatShear";
+
+%As of 08/2012 there are two Bobcat cameras.  For some reason these
+%come in two models Bobcat-2478 and Bobcat-2486. Each model has its
+%own specific calibration file.  You must be careful to specify the 
+%correct file as it contains the pixel correction data for the ccd.
+%shear camera calibration file
+shearCalibFile="/home/mroi/workspace/Xenics-IMAQ/Calibrations/Bobcat2486_2000us_highgain_2486.xca";
+%tilt camera calibration file
+tiltCalibFile="/home/mroi/workspace/Xenics-IMAQ/Calibrations/Bobcat2478_2000us_highgain_2478.xca";
+%xenics color profile file
+xenicsColorProfile="/home/mroi/workspace/Xenics-IMAQ/ColorProfiles/Grayscale.png";
+%Agilis controller device name
+agilisControllerDevice="/dev/ttyUSB0";
+
+%Agilis controller channel number of SY mirror 1
+chM1=1;
+
+%Agilis controller channel number of SY mirror 2
+chM2=2;
+
+%%---------------------------------------
+%%Theta correction calculation constants.
+%%---------------------------------------
+
+%%Distance between SY mirrors 1 and 2 
+Ls2=390.000000;
+
+%%Distance from SY mirror 2 to the lens (included distance traveled to going from BC mirrors 1 and 2) 
+Ll=650.000000;
+
+%%Distance from the lens to the tilt detector
+Ld = 80.000000;
+
+%%Focal length of the lens in the tilt detector
+F = 150.000000;
+
+%%Distance from SY mirror 2 to the beam splitter in the shear detector
+Lbs = 540.000000;
+
+%%Distance from the beam splitter to the beam compressor 
+Lc = 0.000000;
+
+%%Magnification of the beam compressor
+M = 1.000000;
+
+%%Distance from the beam compressor to the shear detector 
+Lr = 60.000000;
+
+%%pixel length in x-direction in mm 
+xpix = 0.010000;
+
+%%pixel length in y-direction in mm 
+ypix = 0.010000;
+
+

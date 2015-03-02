@@ -1,0 +1,11 @@
+# Don't track binaries
+bin
+
+# Editor files
+*~
+
+# Log files and crash dumps
+*.log
+
+# Subversion hidden dir for obvious reasons
+.svn

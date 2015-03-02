@@ -1,0 +1,28 @@
+Note:  Certain changes (including deleting certain scripts) are not included.  For more detail look at dirty package.  
+
+Wrote CameraPanel to allow user to switch between camera configuration files easily.  
+
+Wrote PIRules to handle error checking in the algorithm to be implemented if limit switches are added to the mounts (implemented with PIControl lines 476 to 480).
+
+Added homing buttons to actuator to be implemented if limit switches are added (ActuatorPanel lines 141 and 151)
+
+Added ability to set home position to current position (AlignPanel line 97)
+
+
+
+
+
+Personal Notes (no need to read if not Sam): 
+
+Removed lines near PIControl line 168 to turn off hack that caused wierdness with crosshairs. It May be worth reusing for trouble shooting)
+	//Reference Hack  
+		tref.x = 290;
+		tref.y = 226;
+		sref.x = 290;
+		sref.y = 226;
+	//End Hack
+
+Changed method in PIControl line 379 to computeThetaCorrection, commenting out most of the other methods in AllignmentMath
+Simplified AlignmentMath.computeStepCorrection  
+Commented out PIControl 408 to 409 so calculations use old method that  only (works better with movement)
+
