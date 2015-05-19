@@ -1,40 +1,34 @@
 package gui;
 
-import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.text.NumberFormat;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFormattedTextField;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JFileChooser;
-import javax.swing.LayoutStyle;
-import javax.swing.SwingUtilities;
-import javax.swing.filechooser.*;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
-import data.AlignmentMath;
-import data.SetupData;
-import xenimaq.NativeImageException;
 import xenimaq.NativeImageImpl;
-import java.util.Hashtable;
+import data.SetupData;
 
 /*This class creates a panel to change the configuration files for the tilt and shear xenics cameras.
  * It does this by changing the configuration file and the internal program settings.  To change to 
  * the new settings after changing presets, one simply must capture the image again.  
  * */
-final public class CameraPanel extends JPanel implements ActionListener, PropertyChangeListener {
+final public class CameraPanel extends JPanel implements ActionListener, PropertyChangeListener, ChangeListener {
 	
 	NativeImageImpl tiltImg;
 	NativeImageImpl shearImg;
@@ -45,6 +39,12 @@ final public class CameraPanel extends JPanel implements ActionListener, Propert
 	JLabel TiltLabel;
 	File dirT;
 	File dirS;
+	JSlider brightnessSlider;
+	JSlider contrastSlider;
+	
+	// TODO: figure out reasonable values for these
+	static final int BRIGHTNESS_MIN = 0, BRIGHTNESS_MAX = 100, BRIGHTNESS_INIT = 50,
+			CONTRAST_MIN = 0, CONTRAST_MAX = 100, CONTRAST_INIT = 50;
 	
 	public CameraPanel(NativeImageImpl tiltImg, NativeImageImpl shearImg){
 		dirT = new File("/home/mroi/workspace/Xenics-IMAQ/Calibrations/Bobcat2478_1000us_highgain_2478.xca");
@@ -58,6 +58,25 @@ final public class CameraPanel extends JPanel implements ActionListener, Propert
 		openShearButton.addActionListener(this);
 		openTiltButton = new JButton("Change Tilt Calibration File");
 		openTiltButton.addActionListener(this);
+		
+		brightnessSlider = new JSlider(BRIGHTNESS_MIN, BRIGHTNESS_MAX, BRIGHTNESS_INIT);
+		brightnessSlider.setMajorTickSpacing(BRIGHTNESS_MAX);
+		brightnessSlider.setMinorTickSpacing(BRIGHTNESS_INIT);
+		brightnessSlider.setPaintTicks(true);
+		brightnessSlider.setPaintLabels(true);
+		brightnessSlider.addChangeListener(this);
+		TitledBorder brightnessBorder = new TitledBorder("Brightness");
+		brightnessSlider.setBorder(brightnessBorder);
+		
+		contrastSlider = new JSlider(CONTRAST_MIN, CONTRAST_MAX, CONTRAST_INIT);
+		contrastSlider.setMajorTickSpacing(CONTRAST_MAX);
+		contrastSlider.setMinorTickSpacing(CONTRAST_INIT);
+		contrastSlider.setPaintTicks(true);
+		contrastSlider.setPaintLabels(true);
+		contrastSlider.addChangeListener(this);
+		TitledBorder contrastBorder = new TitledBorder("Contrast");
+		contrastSlider.setBorder(contrastBorder);
+		
 		GroupLayout layout=new GroupLayout(this);
 		setLayout(layout);
 		layout.setAutoCreateGaps(true);
@@ -67,7 +86,8 @@ final public class CameraPanel extends JPanel implements ActionListener, Propert
 			layout.createSequentialGroup()
 				.addGroup(
 					layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-						.addComponent(openTiltButton).addComponent(openShearButton))
+						.addComponent(openTiltButton).addComponent(openShearButton)
+						.addComponent(brightnessSlider).addComponent(contrastSlider))
 				.addGroup(
 					layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 					    .addComponent(TiltLabel).addComponent(ShearLabel))
@@ -81,7 +101,10 @@ final public class CameraPanel extends JPanel implements ActionListener, Propert
 				.addGroup(
 					layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 						.addComponent(openShearButton).addComponent(ShearLabel))
-			 );
+						
+				.addComponent(brightnessSlider)
+				.addComponent(contrastSlider)
+			);
 	}
 	public String getSetupData(String option, File file){
 		 BufferedReader br = null;
@@ -176,10 +199,24 @@ final public class CameraPanel extends JPanel implements ActionListener, Propert
             
        }
 	}
+	
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		if (e.getSource() == brightnessSlider
+				&& !brightnessSlider.getValueIsAdjusting()) {
+			//TODO:
+			System.out.println("brightnessSlider: " + brightnessSlider.getValue());
+		}
+		if (e.getSource() == contrastSlider
+				&& !contrastSlider.getValueIsAdjusting()) {
+			//TODO:
+			System.out.println("contrastSlider: " + contrastSlider.getValue());
+		}
+	}
+	
 	@Override
 	public void propertyChange(PropertyChangeEvent arg0) {
 		// TODO Auto-generated method stub
 		
 	}
-
 }
