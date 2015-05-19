@@ -11,8 +11,6 @@ import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.WindowAdapter;
@@ -22,7 +20,6 @@ import java.io.UnsupportedEncodingException;
 
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -33,21 +30,15 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JToggleButton;
 import javax.swing.LayoutStyle;
-import javax.swing.SwingUtilities;
-import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.border.LineBorder;
 import javax.swing.event.MouseInputAdapter;
-
-import data.AlignmentMath;
-import data.SetupData;
 
 import xenimaq.NativeImage;
 import xenimaq.NativeImageException;
 import xenimaq.NativeImageImpl;
-
-import agilis.Actuator;
 import agilis.ActuatorInterface;
 import agilis.ActuatorPanel;
+import data.SetupData;
 
 /**
  * Main GUI class, creates window and serves as the parent to all sub panels.
@@ -526,7 +517,8 @@ final public class TiltShearUI extends JFrame implements ActionListener {
 				try{
 					
 					synchronized(grabb){
-						if( (tiltImg.getNativeImageState() != NativeImage.INITIALIZED_RUNNING) 
+						if( tiltImg != null
+								&& (tiltImg.getNativeImageState() != NativeImage.INITIALIZED_RUNNING) 
 								&& (shearImg.getNativeImageState() != NativeImage.INITIALIZED_RUNNING) ){
 							grabb.setSelected(false);
 						}
