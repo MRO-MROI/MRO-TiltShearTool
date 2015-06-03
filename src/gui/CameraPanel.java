@@ -47,7 +47,7 @@ final public class CameraPanel extends JPanel implements ActionListener, Propert
 	JSlider shearContrast;
 	
 	// TODO: figure out reasonable values for these
-	static final int GAMMA_MIN = 0, GAMMA_MAX = 100, GAMMA_INIT = 50;
+	static final int GAMMA_MIN = -10, GAMMA_MAX = 10, GAMMA_INIT = 0;
 	
 	public CameraPanel(NativeImageImpl tiltImg, NativeImageImpl shearImg){
 		dirT = new File("/home/mroi/workspace/Xenics-IMAQ/Calibrations/Bobcat2478_1000us_highgain_2478.xca");
@@ -68,15 +68,7 @@ final public class CameraPanel extends JPanel implements ActionListener, Propert
 		shearBrightness = buildGammaSlider("Shear Brightness");
 		shearContrast = buildGammaSlider("ShearContrast");
 		
-		// TODO: this is a nasty hack just for testing; use visitor pattern later.
-		if(!(tiltImg instanceof FilteredNativeImage)) {
-			tiltBrightness.setEnabled(false);
-			tiltContrast.setEnabled(false);
-		}
-		if(!(shearImg instanceof FilteredNativeImage)) {
-			shearBrightness.setEnabled(false);
-			shearContrast.setEnabled(false);
-		}
+		initGammaSliders();
 		
 		GroupLayout layout=new GroupLayout(this);
 		setLayout(layout);
@@ -248,5 +240,32 @@ final public class CameraPanel extends JPanel implements ActionListener, Propert
 		TitledBorder border = new TitledBorder(title);
 		s.setBorder(border);
 		return s;
+	}
+	
+	private void initGammaSliders() {
+		// TODO: this is a nasty hack just for testing; use visitor pattern later.
+		try {
+			if(tiltImg instanceof FilteredNativeImage) {
+				FilteredNativeImage filteredTilt = (FilteredNativeImage) tiltImg;
+				
+				tiltBrightness.setValue((int) Double.parseDouble(filteredTilt.getFilterParameter("Gamma", "Brightness")));
+				tiltContrast.setValue((int) Double.parseDouble(filteredTilt.getFilterParameter("Gamma", "Contrast")));
+			} else {
+				tiltBrightness.setEnabled(false);
+				tiltContrast.setEnabled(false);
+			}
+			
+			if(shearImg instanceof FilteredNativeImage) {
+				FilteredNativeImage filteredShear = (FilteredNativeImage) shearImg;
+				
+				shearBrightness.setValue((int) Double.parseDouble(filteredShear.getFilterParameter("Gamma", "Brightness")));
+				shearContrast.setValue((int) Double.parseDouble(filteredShear.getFilterParameter("Gamma", "Contrast")));
+			} else {
+				shearBrightness.setEnabled(false);
+				shearContrast.setEnabled(false);
+			}
+		} catch(Exception e) {
+			System.out.println(e);
+		}
 	}
 }
