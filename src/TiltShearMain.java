@@ -1,25 +1,20 @@
 import gui.TiltShearUI;
-
 import impl.DefinedRoutines;
 
-import java.awt.Font;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import util.MemoryWarningSystem;
-
-import data.AlignmentMath;
-import data.SetupData;
+import xenimaq.FilteredNativeImage;
 import xenimaq.NativeImage;
 import xenimaq.NativeImageImpl;
 import agilis.Actuator;
 import agilis.ActuatorInterface;
-import agilis.ActuatorPanel;
-import agilis.AgilisException;
+import data.AlignmentMath;
+import data.SetupData;
 
 /** Main class used to start the TiltShearTool program.
  * 
@@ -116,11 +111,17 @@ final public class TiltShearMain {
 		//these should be defined as variables inside the setup file
 		// shearCalibFile, tiltCalibFile, colorProfile
 		//Also need to add code for controlling the frame rate
-		tiltImg = new NativeImageImpl(tiltImgCtl,"Tilt");
-		tiltImg.setPaintComponent(paintImages);
-		shearImg = new NativeImageImpl(shearImgCtl,"Shear");
-		shearImg.setPaintComponent(paintImages);
+//		tiltImg = new NativeImageImpl(tiltImgCtl,"Tilt");
+//		tiltImg.setPaintComponent(paintImages);
+//		shearImg = new NativeImageImpl(shearImgCtl,"Shear");
+//		shearImg.setPaintComponent(paintImages);
 		
+		//TODO: this inheritance pattern is a little clunky.
+		// figure out how this ought to be done later.
+		tiltImg = new FilteredNativeImage(tiltImgCtl,"Tilt");
+		tiltImg.setPaintComponent(paintImages);
+		shearImg = new FilteredNativeImage(shearImgCtl,"Shear");
+		shearImg.setPaintComponent(paintImages);
 	}
 	
 	/** Starts TiltShearUI 

@@ -21,6 +21,8 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import xenimaq.FilteredNativeImage;
+import xenimaq.NativeImageException;
 import xenimaq.NativeImageImpl;
 import data.SetupData;
 
@@ -39,12 +41,13 @@ final public class CameraPanel extends JPanel implements ActionListener, Propert
 	JLabel TiltLabel;
 	File dirT;
 	File dirS;
-	JSlider brightnessSlider;
-	JSlider contrastSlider;
+	JSlider tiltBrightness;
+	JSlider tiltContrast;
+	JSlider shearBrightness;
+	JSlider shearContrast;
 	
 	// TODO: figure out reasonable values for these
-	static final int BRIGHTNESS_MIN = 0, BRIGHTNESS_MAX = 100, BRIGHTNESS_INIT = 50,
-			CONTRAST_MIN = 0, CONTRAST_MAX = 100, CONTRAST_INIT = 50;
+	static final int GAMMA_MIN = 0, GAMMA_MAX = 100, GAMMA_INIT = 50;
 	
 	public CameraPanel(NativeImageImpl tiltImg, NativeImageImpl shearImg){
 		dirT = new File("/home/mroi/workspace/Xenics-IMAQ/Calibrations/Bobcat2478_1000us_highgain_2478.xca");
@@ -59,23 +62,21 @@ final public class CameraPanel extends JPanel implements ActionListener, Propert
 		openTiltButton = new JButton("Change Tilt Calibration File");
 		openTiltButton.addActionListener(this);
 		
-		brightnessSlider = new JSlider(BRIGHTNESS_MIN, BRIGHTNESS_MAX, BRIGHTNESS_INIT);
-		brightnessSlider.setMajorTickSpacing(BRIGHTNESS_MAX);
-		brightnessSlider.setMinorTickSpacing(BRIGHTNESS_INIT);
-		brightnessSlider.setPaintTicks(true);
-		brightnessSlider.setPaintLabels(true);
-		brightnessSlider.addChangeListener(this);
-		TitledBorder brightnessBorder = new TitledBorder("Brightness");
-		brightnessSlider.setBorder(brightnessBorder);
+		/* Brightness, Contrast for Tilt and Shear */
+		tiltBrightness = buildGammaSlider("Tilt Brightness");
+		tiltContrast = buildGammaSlider("Tilt Contrast");
+		shearBrightness = buildGammaSlider("Shear Brightness");
+		shearContrast = buildGammaSlider("ShearContrast");
 		
-		contrastSlider = new JSlider(CONTRAST_MIN, CONTRAST_MAX, CONTRAST_INIT);
-		contrastSlider.setMajorTickSpacing(CONTRAST_MAX);
-		contrastSlider.setMinorTickSpacing(CONTRAST_INIT);
-		contrastSlider.setPaintTicks(true);
-		contrastSlider.setPaintLabels(true);
-		contrastSlider.addChangeListener(this);
-		TitledBorder contrastBorder = new TitledBorder("Contrast");
-		contrastSlider.setBorder(contrastBorder);
+		// TODO: this is a nasty hack just for testing; use visitor pattern later.
+		if(!(tiltImg instanceof FilteredNativeImage)) {
+			tiltBrightness.setEnabled(false);
+			tiltContrast.setEnabled(false);
+		}
+		if(!(shearImg instanceof FilteredNativeImage)) {
+			shearBrightness.setEnabled(false);
+			shearContrast.setEnabled(false);
+		}
 		
 		GroupLayout layout=new GroupLayout(this);
 		setLayout(layout);
@@ -87,7 +88,8 @@ final public class CameraPanel extends JPanel implements ActionListener, Propert
 				.addGroup(
 					layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 						.addComponent(openTiltButton).addComponent(openShearButton)
-						.addComponent(brightnessSlider).addComponent(contrastSlider))
+						.addComponent(tiltBrightness).addComponent(tiltContrast)
+						.addComponent(shearBrightness).addComponent(shearContrast))
 				.addGroup(
 					layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 					    .addComponent(TiltLabel).addComponent(ShearLabel))
@@ -102,8 +104,10 @@ final public class CameraPanel extends JPanel implements ActionListener, Propert
 					layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 						.addComponent(openShearButton).addComponent(ShearLabel))
 						
-				.addComponent(brightnessSlider)
-				.addComponent(contrastSlider)
+				.addComponent(tiltBrightness)
+				.addComponent(tiltContrast)
+				.addComponent(shearBrightness)
+				.addComponent(shearContrast)
 			);
 	}
 	public String getSetupData(String option, File file){
@@ -202,15 +206,29 @@ final public class CameraPanel extends JPanel implements ActionListener, Propert
 	
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		if (e.getSource() == brightnessSlider
-				&& !brightnessSlider.getValueIsAdjusting()) {
-			//TODO:
-			System.out.println("brightnessSlider: " + brightnessSlider.getValue());
-		}
-		if (e.getSource() == contrastSlider
-				&& !contrastSlider.getValueIsAdjusting()) {
-			//TODO:
-			System.out.println("contrastSlider: " + contrastSlider.getValue());
+		try {
+			if (e.getSource() == tiltBrightness
+					&& !tiltBrightness.getValueIsAdjusting()) {
+				((FilteredNativeImage) tiltImg).setFilterParameter("Gamma", "Brightness", "" + tiltBrightness.getValue());
+				System.out.println("tiltBrightness: " + tiltBrightness.getValue());
+			}
+			if (e.getSource() == tiltContrast
+					&& !tiltContrast.getValueIsAdjusting()) {
+				((FilteredNativeImage) tiltImg).setFilterParameter("Gamma", "Contrast", "" + tiltContrast.getValue());
+				System.out.println("tiltContrast: " + tiltContrast.getValue());
+			}
+			if (e.getSource() == shearBrightness
+					&& !shearBrightness.getValueIsAdjusting()) {
+				((FilteredNativeImage) shearImg).setFilterParameter("Gamma", "Brightness", "" + shearBrightness.getValue());
+				System.out.println("shearBrightness: " + shearBrightness.getValue());
+			}
+			if (e.getSource() == shearContrast
+					&& !shearContrast.getValueIsAdjusting()) {
+				((FilteredNativeImage) shearImg).setFilterParameter("Gamma", "Contrast", "" + shearContrast.getValue());
+				System.out.println("shearContrast: " + shearContrast.getValue());
+			}
+		} catch(NativeImageException err) {
+			System.out.println(err);
 		}
 	}
 	
@@ -218,5 +236,17 @@ final public class CameraPanel extends JPanel implements ActionListener, Propert
 	public void propertyChange(PropertyChangeEvent arg0) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	private JSlider buildGammaSlider(String title) {
+		JSlider s = new JSlider(GAMMA_MIN, GAMMA_MAX, GAMMA_INIT);
+		s.setMajorTickSpacing(GAMMA_MAX);
+		s.setMinorTickSpacing(GAMMA_INIT);
+		s.setPaintTicks(true);
+		s.setPaintLabels(true);
+		s.addChangeListener(this);
+		TitledBorder border = new TitledBorder(title);
+		s.setBorder(border);
+		return s;
 	}
 }
