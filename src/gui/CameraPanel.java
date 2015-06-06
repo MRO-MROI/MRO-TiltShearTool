@@ -22,7 +22,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import xenimaq.FilteredNativeImage;
+import xenimaq.GammaVisitor;
 import xenimaq.NativeImageException;
 import xenimaq.NativeImageImpl;
 import data.SetupData;
@@ -32,6 +32,8 @@ import data.SetupData;
  * the new settings after changing presets, one simply must capture the image again.  
  * */
 final public class CameraPanel extends JPanel implements ActionListener, PropertyChangeListener, ChangeListener {
+
+	static final int GAMMA_MIN = -10, GAMMA_MAX = 10, GAMMA_INIT = 0, GAMMA_UNIT = 100;
 	
 	NativeImageImpl tiltImg;
 	NativeImageImpl shearImg;
@@ -46,9 +48,8 @@ final public class CameraPanel extends JPanel implements ActionListener, Propert
 	JSlider tiltContrast;
 	JSlider shearBrightness;
 	JSlider shearContrast;
-	
-	// TODO: figure out reasonable values for these
-	static final int GAMMA_MIN = -10, GAMMA_MAX = 10, GAMMA_INIT = 0, GAMMA_UNIT = 100;
+	GammaVisitor tiltGamma;
+	GammaVisitor shearGamma;
 	
 	public CameraPanel(NativeImageImpl tiltImg, NativeImageImpl shearImg){
 		dirT = new File("/home/mroi/workspace/Xenics-IMAQ/Calibrations/Bobcat2478_1000us_highgain_2478.xca");
@@ -68,6 +69,9 @@ final public class CameraPanel extends JPanel implements ActionListener, Propert
 		tiltContrast = buildGammaSlider("Tilt Contrast");
 		shearBrightness = buildGammaSlider("Shear Brightness");
 		shearContrast = buildGammaSlider("ShearContrast");
+		
+		tiltGamma = new GammaVisitor();
+		shearGamma = new GammaVisitor();
 		
 		initGammaSliders();
 		
@@ -200,25 +204,34 @@ final public class CameraPanel extends JPanel implements ActionListener, Propert
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		try {
+			
 			if (e.getSource() == tiltBrightness
 					&& !tiltBrightness.getValueIsAdjusting()) {
-				((FilteredNativeImage) tiltImg).setFilterParameter("Gamma", "Brightness", "" + (double) tiltBrightness.getValue() / GAMMA_UNIT);
-				System.out.println("tiltBrightness: " + (double) tiltBrightness.getValue() / GAMMA_UNIT);
+				double brightness = tiltBrightness.getValue() / GAMMA_UNIT;
+				tiltGamma.setParameter("Brightness", "" + brightness);
+				System.out.println("Tilt Brightness: " + brightness);
+				tiltImg.exportVisitor(tiltGamma);
 			}
 			if (e.getSource() == tiltContrast
 					&& !tiltContrast.getValueIsAdjusting()) {
-				((FilteredNativeImage) tiltImg).setFilterParameter("Gamma", "Contrast", "" + (double) tiltContrast.getValue() / GAMMA_UNIT);
-				System.out.println("tiltContrast: " + (double) tiltContrast.getValue() / GAMMA_UNIT);
+				double contrast = tiltContrast.getValue() / GAMMA_UNIT;
+				tiltGamma.setParameter("Contrast", "" + contrast);
+				System.out.println("Tilt Contrast: " + contrast);
+				tiltImg.exportVisitor(tiltGamma);
 			}
 			if (e.getSource() == shearBrightness
 					&& !shearBrightness.getValueIsAdjusting()) {
-				((FilteredNativeImage) shearImg).setFilterParameter("Gamma", "Brightness", "" + (double) shearBrightness.getValue() / GAMMA_UNIT);
-				System.out.println("shearBrightness: " + (double) shearBrightness.getValue() / GAMMA_UNIT);
+				double brightness = shearBrightness.getValue() / GAMMA_UNIT;
+				shearGamma.setParameter("Brightness", "" + brightness);
+				System.out.println("Shear Brightness: " + brightness);
+				shearImg.exportVisitor(shearGamma);
 			}
 			if (e.getSource() == shearContrast
 					&& !shearContrast.getValueIsAdjusting()) {
-				((FilteredNativeImage) shearImg).setFilterParameter("Gamma", "Contrast", "" + (double) shearContrast.getValue() / GAMMA_UNIT);
-				System.out.println("shearContrast: " + (double) shearContrast.getValue() / GAMMA_UNIT);
+				double contrast = shearContrast.getValue() / GAMMA_UNIT;
+				shearGamma.setParameter("Contrast", "" + contrast);
+				System.out.println("Shear Contrast: " + contrast);
+				shearImg.exportVisitor(shearGamma);
 			}
 		} catch(NativeImageException err) {
 			System.out.println(err);
@@ -252,23 +265,25 @@ final public class CameraPanel extends JPanel implements ActionListener, Propert
 	}
 	
 	private void initGammaSliders() {
-		// TODO: this is a nasty hack just for testing; use visitor pattern later.
 		try {
-			if(tiltImg instanceof FilteredNativeImage) {
-				FilteredNativeImage filteredTilt = (FilteredNativeImage) tiltImg;
-				
-				tiltBrightness.setValue((int) (Double.parseDouble(filteredTilt.getFilterParameter("Gamma", "Brightness")) * GAMMA_UNIT));
-				tiltContrast.setValue((int) (Double.parseDouble(filteredTilt.getFilterParameter("Gamma", "Contrast")) * GAMMA_UNIT));
+			if(tiltImg != null) {
+				tiltImg.acceptVisitor(tiltGamma);
+			}
+			if(shearImg != null) {
+				shearImg.acceptVisitor(shearGamma);
+			}
+			
+			if(tiltGamma.parameterCount() == 2) {
+				tiltBrightness.setValue((int) (Double.parseDouble(tiltGamma.getParameter("Brightness"))* GAMMA_UNIT));
+				tiltContrast.setValue((int) (Double.parseDouble(tiltGamma.getParameter("Contrast")) * GAMMA_UNIT));
 			} else {
 				tiltBrightness.setEnabled(false);
 				tiltContrast.setEnabled(false);
 			}
 			
-			if(shearImg instanceof FilteredNativeImage) {
-				FilteredNativeImage filteredShear = (FilteredNativeImage) shearImg;
-				
-				shearBrightness.setValue((int) (Double.parseDouble(filteredShear.getFilterParameter("Gamma", "Brightness")) * GAMMA_UNIT));
-				shearContrast.setValue((int) (Double.parseDouble(filteredShear.getFilterParameter("Gamma", "Contrast")) * GAMMA_UNIT));
+			if(shearGamma.parameterCount() == 2) {
+				shearBrightness.setValue((int) (Double.parseDouble(shearGamma.getParameter("Brightness"))* GAMMA_UNIT));
+				shearContrast.setValue((int) (Double.parseDouble(shearGamma.getParameter("Contrast")) * GAMMA_UNIT));
 			} else {
 				shearBrightness.setEnabled(false);
 				shearContrast.setEnabled(false);
