@@ -226,28 +226,28 @@ final public class CameraPanel extends JPanel implements ActionListener,
 
 			if (e.getSource() == tiltBrightness
 					&& !tiltBrightness.getValueIsAdjusting()) {
-				double brightness = tiltBrightness.getValue() / GAMMA_UNIT;
+				double brightness = (double) tiltBrightness.getValue() / GAMMA_UNIT;
 				tiltGamma.setParameter("Brightness", "" + brightness);
 				System.out.println("Tilt Brightness: " + brightness);
 				tiltImg.exportVisitor(tiltGamma);
 			}
 			if (e.getSource() == tiltContrast
 					&& !tiltContrast.getValueIsAdjusting()) {
-				double contrast = tiltContrast.getValue() / GAMMA_UNIT;
+				double contrast = (double) tiltContrast.getValue() / GAMMA_UNIT;
 				tiltGamma.setParameter("Contrast", "" + contrast);
 				System.out.println("Tilt Contrast: " + contrast);
 				tiltImg.exportVisitor(tiltGamma);
 			}
 			if (e.getSource() == shearBrightness
 					&& !shearBrightness.getValueIsAdjusting()) {
-				double brightness = shearBrightness.getValue() / GAMMA_UNIT;
+				double brightness = (double) shearBrightness.getValue() / GAMMA_UNIT;
 				shearGamma.setParameter("Brightness", "" + brightness);
 				System.out.println("Shear Brightness: " + brightness);
 				shearImg.exportVisitor(shearGamma);
 			}
 			if (e.getSource() == shearContrast
 					&& !shearContrast.getValueIsAdjusting()) {
-				double contrast = shearContrast.getValue() / GAMMA_UNIT;
+				double contrast = (double) shearContrast.getValue() / GAMMA_UNIT;
 				shearGamma.setParameter("Contrast", "" + contrast);
 				System.out.println("Shear Contrast: " + contrast);
 				shearImg.exportVisitor(shearGamma);
